@@ -65,6 +65,8 @@ Headers:
 
 "use strict";
 const { stringify } = require("uuid");
+const ipaddr = require("ipaddr.js");
+const { rtp_packet_decoder } = require("./helpers/rtpDecoder");
 
 // Lengths in bytes
 const pduHeadersMap = {
@@ -76,28 +78,6 @@ const pduHeadersMap = {
   payloadDirection: { length: 2, type: "integer" },
   xid: { length: 16, type: "uuid" },
   correlationId: { length: 8, type: "string" },
-};
-
-// Conditional Attributes Types
-const conditionalAttributesMap = {
-  1: { name: "ETSI TS 102 232-1", type: "hex" }, // type is not 3GPP defined
-  2: { name: "3GPP TS 33.128", type: "hex" }, // type is not 3GPP defined
-  3: { name: "ETSI TS 133 108", type: "hex" }, // type is not 3GPP defined
-  4: { name: "Proprietary Attribute", type: "hex" }, // type is not 3GPP defined
-  5: { name: "Domain ID (DID)", type: "hex" }, // type is not 3GPP defined
-  6: { name: "Network Function ID (NFID)", type: "string" }, // type is not 3GPP defined
-  7: { name: "Interception Point ID (IPID)", type: "string" }, // type is not 3GPP defined
-  8: { name: "Sequence Number", type: "integer" },
-  9: { name: "Timestamp", type: "timestamp" },
-  10: { name: "Source IPv4 address", type: "ipv4" },
-  11: { name: "Destination IPv4 address", type: "ipv4" },
-  12: { name: "Source IPv6 address", type: "ipv6" },
-  13: { name: "Destination IPv6 address", type: "ipv6" },
-  14: { name: "Source Port", type: "integer" },
-  15: { name: "Destination Port", type: "integer" },
-  16: { name: "IP Protocol", type: "integer" },
-  17: { name: "Matched Target Identifier", type: "string" }, // encoded utf8 string
-  18: { name: "Other Target Identifier", type: "string" }, // encoded utf8 string
 };
 
 const pduTypesMap = {
@@ -122,6 +102,28 @@ const payloadTypesMap = {
   11: "RADIUS Packet",
   12: "GTP-U Message",
   13: "MSRP Message",
+};
+
+// Conditional Attributes Types
+const conditionalAttributesMap = {
+  1: { name: "ETSI TS 102 232-1", type: "hex" }, // type is not 3GPP defined
+  2: { name: "3GPP TS 33.128", type: "hex" }, // type is not 3GPP defined
+  3: { name: "ETSI TS 133 108", type: "hex" }, // type is not 3GPP defined
+  4: { name: "Proprietary Attribute", type: "hex" }, // type is not 3GPP defined
+  5: { name: "Domain ID (DID)", type: "hex" }, // type is not 3GPP defined
+  6: { name: "Network Function ID (NFID)", type: "string" }, // type is not 3GPP defined
+  7: { name: "Interception Point ID (IPID)", type: "string" }, // type is not 3GPP defined
+  8: { name: "Sequence Number", type: "integer" },
+  9: { name: "Timestamp", type: "timestamp" },
+  10: { name: "Source IPv4 address", type: "ip" },
+  11: { name: "Destination IPv4 address", type: "ip" },
+  12: { name: "Source IPv6 address", type: "ip" },
+  13: { name: "Destination IPv6 address", type: "ip" },
+  14: { name: "Source Port", type: "integer" },
+  15: { name: "Destination Port", type: "integer" },
+  16: { name: "IP Protocol", type: "integer" },
+  17: { name: "Matched Target Identifier", type: "string" }, // encoded utf8 string
+  18: { name: "Other Target Identifier", type: "string" }, // encoded utf8 string
 };
 
 const ipProtocolsMap = {
@@ -216,16 +218,9 @@ const pduDecoder = (pduHexString) => {
           value = seconds + nanoseconds;
           metaData["Timestamp"] = new Date(seconds * 1000);
           break;
-        case "ipv4":
+        case "ip":
           const ipv4Buffer = pduBuffer.slice(offset, offset + attLength);
-          value = ipv4Buffer.join(".");
-          break;
-        case "ipv6":
-          const ipv6Buffer = pduBuffer.slice(offset, offset + attLength);
-          value = ipv6Buffer
-            .toString("hex")
-            .match(/.{1,4}/g)
-            .join(":");
+          value = ipaddr.fromByteArray(ipv4Buffer).toString();
           break;
         default:
           throw new Error(`Unsupported type: ${type}`);
@@ -264,6 +259,8 @@ const pduDecoder = (pduHexString) => {
 
     if (result.headers.payloadFormat === 9) {
       metaData["SIP Message String"] = payload.toString("utf8");
+    } else if (result.headers.payloadFormat === 8) {
+      metaData["RTP Packet"] = rtp_packet_decoder(payload.toString("hex"));
     }
 
     // return the result

@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/hyavari/x2x3PduDecoder#readme",
   "dependencies": {
+    "ipaddr.js": "^2.1.0",
     "uuid": "^9.0.0"
   }
 }
