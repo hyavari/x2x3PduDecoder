@@ -1,0 +1,10 @@
+.history
+node_modules
+.project
+test-reports
+localTest.js
+tests
+coverage
+.eslintrc.js
+.editorconfig
+/test

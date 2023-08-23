@@ -1,0 +1,30 @@
+{
+  "name": "x2x3pdudecoder",
+  "version": "1.0.0",
+  "description": "X2/X3 LI PDU Decoder in Node.js",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyavari/x2x3PduDecoder.git"
+  },
+  "keywords": [
+    "LI",
+    "X2",
+    "X3",
+    "PDU",
+    "Lawful",
+    "Interception"
+  ],
+  "author": "Hossein Yavari",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hyavari/x2x3PduDecoder/issues"
+  },
+  "homepage": "https://github.com/hyavari/x2x3PduDecoder#readme",
+  "dependencies": {
+    "uuid": "^9.0.0"
+  }
+}
