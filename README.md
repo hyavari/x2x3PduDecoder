@@ -8,6 +8,7 @@ Unveil the intricacies of the X2/X3 PDU Format with this Node.js decoder. This t
 
 The X2/X3 PDU Format lies at the heart of lawful interception, offering insights into communication networks. Dive into the protocol's anatomy and explore its fields:
 
+<pre>
 
  0                   1                   2                   3 
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -32,6 +33,8 @@ The X2/X3 PDU Format lies at the heart of lawful interception, offering insights
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                     Payload (Variable Length)                
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+</pre>
 
 
 **Headers:**
