@@ -70,7 +70,7 @@ const { rtp_packet_decoder } = require("./helpers/rtpDecoder");
 
 // Lengths in bytes
 const pduHeadersMap = {
-  version: { length: 2, type: "integer" },
+  version: { length: 2, type: "version" },
   pduType: { length: 2, type: "integer" },
   headerLength: { length: 4, type: "integer" },
   payloadLength: { length: 4, type: "integer" },
@@ -131,6 +131,14 @@ const ipProtocolsMap = {
   17: "UDP",
 };
 
+// version header is not simple integer
+const decodeVersionHeader = (buffer) => {
+  const version = buffer.readUInt16BE(0);
+  const major = (version >> 8) & 0xff;
+  const minor = version & 0xff;
+  return { major, minor };
+};
+
 const readInteger = (buffer, offset, length) => {
   switch (length) {
     case 1:
@@ -165,6 +173,10 @@ const pduDecoder = (pduHexString) => {
     // read the mandatory headers
     for (const [key, { length, type }] of Object.entries(pduHeadersMap)) {
       switch (type) {
+        case "version":
+          const buffer = pduBuffer.slice(offset, offset + length);
+          result.headers[key] = decodeVersionHeader(buffer);
+          break;
         case "integer":
           result.headers[key] = readInteger(pduBuffer, offset, length);
           break;
