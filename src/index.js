@@ -65,7 +65,7 @@ Headers:
 
 "use strict";
 const { stringify } = require("uuid");
-const ipaddr = require("ipaddr.js");
+const ip = require("ip");
 const { rtp_packet_decoder } = require("./helpers/rtpDecoder");
 
 // Lengths in bytes
@@ -174,7 +174,7 @@ const pduDecoder = (pduHexString) => {
     for (const [key, { length, type }] of Object.entries(pduHeadersMap)) {
       switch (type) {
         case "version":
-          const buffer = pduBuffer.slice(offset, offset + length);
+          const buffer = pduBuffer.subarray(offset, offset + length);
           result.headers[key] = decodeVersionHeader(buffer);
           break;
         case "integer":
@@ -188,7 +188,7 @@ const pduDecoder = (pduHexString) => {
           );
           break;
         case "uuid":
-          let uuidBytes = pduBuffer.slice(offset, offset + length);
+          let uuidBytes = pduBuffer.subarray(offset, offset + length);
           result.headers[key] = stringify(uuidBytes);
           break;
         default:
@@ -215,7 +215,9 @@ const pduDecoder = (pduHexString) => {
 
       switch (type) {
         case "hex":
-          value = pduBuffer.slice(offset, offset + attLength).toString("hex");
+          value = pduBuffer
+            .subarray(offset, offset + attLength)
+            .toString("hex");
           break;
         case "integer":
           value = readInteger(pduBuffer, offset, attLength);
@@ -224,7 +226,7 @@ const pduDecoder = (pduHexString) => {
           value = pduBuffer.toString("utf8", offset, offset + attLength);
           break;
         case "timestamp":
-          const timeStampBuf = pduBuffer.slice(offset, offset + attLength);
+          const timeStampBuf = pduBuffer.subarray(offset, offset + attLength);
           const seconds = timeStampBuf.readUInt32BE(0);
           const nanoseconds = timeStampBuf.readUInt32BE(4);
           value = seconds + nanoseconds;
@@ -232,7 +234,7 @@ const pduDecoder = (pduHexString) => {
           break;
         case "ip":
           const ipv4Buffer = pduBuffer.slice(offset, offset + attLength);
-          value = ipaddr.fromByteArray(ipv4Buffer).toString();
+          value = ip.toString(ipv4Buffer);
           break;
         default:
           throw new Error(`Unsupported type: ${type}`);
@@ -248,7 +250,7 @@ const pduDecoder = (pduHexString) => {
     }
 
     // read the payload
-    const payload = pduBuffer.slice(
+    const payload = pduBuffer.subarray(
       offset,
       offset + result.headers.payloadLength
     );
